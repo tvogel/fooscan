@@ -1,0 +1,33 @@
+#!/bin/bash
+set -o errexit
+#set -o xtrace
+
+lastsavedirfile="$HOME/.foodaemon-last-save-dir"
+
+[ -r $lastsavedirfile ] && lastdir=$(cat $lastsavedirfile)
+lastdir=${lastdir:-$HOME}
+
+while sleep 1; do
+    if scanimage -A | grep -F -- "--scan[=(yes|no)] [yes]"; then
+        savefilename=""
+        while [ -z "$savefilename" ]; do
+            savefilename=$(kdialog --title "Choose PDF filename" --getsavefilename "$lastdir" "*.pdf") || true
+            [ -z "$savefilename" ] && break
+            if [ -e "$savefilename" ] && ! kdialog --title "Overwrite?" --yesno "Overwrite $savefilename?"; then
+                savefilename=""
+            fi
+        done
+        [ -z "$savefilename" ] && continue
+            
+        echo SCAN TO "$savefilename"
+        lastdir=$(dirname "$savefilename")
+        echo "$lastdir" >$lastsavedirfile
+        fooscan "$savefilename"
+        xdg-open "$savefilename"
+        if kdialog --title "Simplex?" --yesno "Remove even pages?"; then
+            stripeven -i "$savefilename"
+        fi
+        echo SCAN DONE "$savefilename"
+    fi
+done
+

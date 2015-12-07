@@ -1,0 +1,32 @@
+#!/bin/bash
+#set -o xtrace
+set -o errexit
+set -o pipefail
+
+resolution=150
+croprect="1240x1754+0+10" # A4, 1.7 mm shifted down-page
+output="$1"
+
+if [ ! "$output" ]; then
+    echo "Usage: $0 <output.pdf>"
+    exit 1
+fi
+
+workdir=$(mktemp --tmpdir -d fooscan.XXXXXXXXXX)
+
+pushd $workdir
+scanimage --batch=out-%03d.pnm --source="ADF Duplex" --format=pnm --mode=Gray --resolution=$resolution --page-height=0 --brightness=40 --contrast=75
+for pnm in out*.pnm; do
+    convert $pnm -gravity north -crop $croprect ${pnm/%.pnm/.cropped.pnm}
+done
+
+convert out*.cropped.pnm -density ${resolution}x${resolution} -compress jpeg out.pdf
+#convert out*.cropped.pnm -density 150x150 -compress zip -quality 100 out_zip.pdf
+#convert out*.cropped.pnm -density 150x150 -compress Group4 -quality 100 out_g4.pdf
+
+popd
+
+mv $workdir/out.pdf $output
+
+rm -rf $workdir
+

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+inplace=""
+while getopts "id" option; do
+    case $option in
+        i)
+            inplace="yes"
+        ;;
+        *)
+            exit 1
+        ;;
+    esac
+done
+shift $((OPTIND-1))
+
+pdf="$1"
+
+if [ -z "$pdf" ]; then
+    echo "Usage: $0 [-i] <pdf>"
+    echo "	-i: in-place, otherwise appends '_stripped' to filename"
+    exit 1
+fi
+
+result_pdf="${pdf%%.pdf}_stripped.pdf"
+
+pdftk "$pdf" cat 1-endodd output "$result_pdf"
+
+if [ "$inplace" = "yes" ]; then
+    mv "$result_pdf" "$pdf"
+    result_pdf="$pdf"
+fi
+
+echo "Wrote $result_pdf"
