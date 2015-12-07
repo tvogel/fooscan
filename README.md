@@ -25,6 +25,7 @@ Requirements
 ------------
 
 - SANE scanimage with epjitsu driver (for button status)
+- sane-backends >=1.0.25: contains fixes for image positioning when duplex-scanning with epjitsu
 - ImageMagick convert for cropping and writing PDF
 - pdftk for stripeven
 - kdialog for foodaemon UI
