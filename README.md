@@ -7,6 +7,7 @@ This consists of three bash scripts:
 - fooscan output.pdf
 
   duplex scans a stack of pages and saves it to output.pdf
+
   in-file customization: scan resolution (default 150 dpi) and crop rect (default A4, shifted 1.7 mm down-page)
   
 - stripeven [-i] input.pdf
